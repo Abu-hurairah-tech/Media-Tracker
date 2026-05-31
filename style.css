@@ -114,14 +114,25 @@ body {
 .media-card {
   background-color: #1e1e1e;
   padding: 20px;
+  padding-bottom: 40px;
   border-radius: 8px;
   border-left: 5px solid #ff4757;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s ease;
+  /* transition: transform 0.2s ease; */
+  transition:
+    transform 0.2s ease,
+    opacity 0.4s ease-out;
+  position: relative;
 }
 
 .media-card:hover {
   transform: translateY(-5px);
+}
+
+.fade-out {
+  opacity: 0 !important;
+  transform: scale(0.8) translateY(30px) !important; /* Shrink to 80% and drop down 30px */
+  pointer-events: none; /* Prevents the user from clicking it while it's fading */
 }
 
 .media-card h3 {
@@ -137,5 +148,52 @@ body {
   border-radius: 20px;
   margin-right: 5px;
   background-color: #2a2a2a;
+  transition:
+    transform 0.2s ease,
+    color 0.3s ease;
+  text-transform: capitalize;
   color: #a0a0a0;
+  cursor: pointer;
+}
+
+.badge:hover {
+  color: #ff4757;
+  transform: translateY(-5px);
+}
+
+.date-Added {
+  position: absolute;
+  bottom: 12px;
+  right: 15px;
+  font-size: 11px;
+  color: #666;
+  font-style: italic;
+}
+.delete-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.2s ease;
+}
+
+.delete-btn svg {
+  width: 20px;
+  height: 20px;
+  fill: #666;
+  transition:
+    fill 0.2s ease,
+    transform 0.2s ease;
+}
+
+.delete-btn:hover {
+  transform: scale(1.1);
+}
+
+.delete-btn:hover svg {
+  fill: #ff4757;
+  transform: rotate(10deg);
 }
