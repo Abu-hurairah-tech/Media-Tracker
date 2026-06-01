@@ -306,3 +306,64 @@ filterLinks.forEach(function (link) {
     applyFilter(this.innerText);
   });
 });
+
+
+// --- DASHBOARD LOGIC ---
+
+const dashboardModal = document.getElementById('dashboard-modal');
+const navDashboard = document.getElementById('nav-dashboard');
+const statsContainer = document.getElementById('stats-container');
+
+// 1. Open Dashboard & Trigger Calculations
+navDashboard.addEventListener('click', function(e) {
+    e.preventDefault();
+    generateStats(); // Run the math
+    dashboardModal.classList.add('show'); // Reveal the modal
+});
+
+// 2. Close Dashboard
+function closeDashboard() {
+    dashboardModal.classList.remove('show');
+}
+
+// 3. The Math Engine
+function generateStats() {
+    // Total count is just the length of the array
+    const total = mediaVault.length;
+    
+    // We use the .filter() method to count specific items
+    // (Notice how we account for different types you might have added!)
+    const animeCount = mediaVault.filter(function(i) { return i.type === 'Anime'; }).length;
+    const movieCount = mediaVault.filter(function(i) { return i.type === 'Movie'; }).length;
+    const gameCount = mediaVault.filter(function(i) { return i.type === 'Game'; }).length;
+
+    // Count by Status
+    const completedCount = mediaVault.filter(function(i) { return i.status === 'Completed'; }).length;
+    const watchingCount = mediaVault.filter(function(i) { return i.status === 'Watching'; }).length;
+
+    // 4. Inject the calculated numbers into our HTML Grid
+    statsContainer.innerHTML = `
+        <div class="stat-card">
+            <h4>Total Entries</h4>
+            <span>${total}</span>
+        </div>
+        <div class="stat-card">
+            <h4>Completed</h4>
+            <span style="color: #2ecc71;">${completedCount}</span> </div>
+        <div class="stat-card">
+            <h4>In Progress</h4>
+            <span style="color: #f1c40f;">${watchingCount}</span> </div>
+        <div class="stat-card">
+            <h4>Anime</h4>
+            <span>${animeCount}</span>
+        </div>
+        <div class="stat-card">
+            <h4>Games</h4>
+            <span>${gameCount}</span>
+        </div>
+        <div class="stat-card">
+            <h4>Movies</h4>
+            <span>${movieCount}</span>
+        </div>
+    `;
+}

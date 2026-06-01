@@ -27,6 +27,7 @@
         <li><a href="#" class="active">All</a></li>
         <li><a href="#">Watching</a></li>
         <li><a href="#">Completed</a></li>
+        <li><a href="#" id="nav-dashboard">Stats</a></li>
 
         <li>
           <div class="search-wrapper" id="search-wrapper">
@@ -78,7 +79,11 @@
             <option value="Plan to Watch">Plan to Watch</option>
           </select>
 
-          <input type="date" id="date-input" title="Optional: Set a custom start/completion date">
+          <input
+            type="date"
+            id="date-input"
+            title="Optional: Set a custom start/completion date"
+          />
           <button id="submit-btn" class="add-btn">Add to vault</button>
         </form>
       </section>
@@ -120,6 +125,15 @@
       </div>
     </div>
 
+    <div class="modal-overlay" id="dashboard-modal">
+      <div class="modal-content dashboard-content">
+        <div class="dashboard-header">
+          <h2>Vault Statistics</h2>
+          <button class="close-btn" onclick="closeDashboard()">✖</button>
+        </div>
+        <div class="stats-grid" id="stats-container"></div>
+      </div>
+    </div>
     <script src="script.js"></script>
   </body>
 </html>
