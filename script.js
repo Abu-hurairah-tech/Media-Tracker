@@ -1,4 +1,8 @@
 console.log("hello");
+const deleteSvg =
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free 7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M262.2 48C248.9 48 236.9 56.3 232.2 68.8L216 112L120 112C106.7 112 96 122.7 96 136C96 149.3 106.7 160 120 160L520 160C533.3 160 544 149.3 544 136C544 122.7 533.3 112 520 112L424 112L407.8 68.8C403.1 56.3 391.2 48 377.8 48L262.2 48zM128 208L128 512C128 547.3 156.7 576 192 576L448 576C483.3 576 512 547.3 512 512L512 208L464 208L464 512C464 520.8 456.8 528 448 528L192 528C183.2 528 176 520.8 176 512L176 208L128 208zM288 280C288 266.7 277.3 256 264 256C250.7 256 240 266.7 240 280L240 456C240 469.3 250.7 480 264 480C277.3 480 288 469.3 288 456L288 280zM400 280C400 266.7 389.3 256 376 256C362.7 256 352 266.7 352 280L352 456C352 469.3 362.7 480 376 480C389.3 480 400 469.3 400 456L400 280z"/></svg>';
+
+let mediaForm = document.getElementById("media-form");
 let titleInput = document.getElementById("title-input");
 let typeInput = document.getElementById("type-input");
 let statusInput = document.getElementById("status-input");
@@ -7,7 +11,9 @@ let gallery = document.getElementById("media-gallery");
 
 let mediaVault = [];
 
-submitBtn.addEventListener("click", function () {
+mediaForm.addEventListener("submit", function (e) {
+  e.preventDefault();
+
   const title = titleInput.value;
   const type = typeInput.value;
   const status = statusInput.value;
@@ -63,7 +69,8 @@ function displayMedia() {
     const statusClass = item.status.toLowerCase().replace(/\s/g, "-");
 
     card.innerHTML = `
-    <button class="delete-btn" onclick="deleteCard(${item.id})"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free 7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M262.2 48C248.9 48 236.9 56.3 232.2 68.8L216 112L120 112C106.7 112 96 122.7 96 136C96 149.3 106.7 160 120 160L520 160C533.3 160 544 149.3 544 136C544 122.7 533.3 112 520 112L424 112L407.8 68.8C403.1 56.3 391.2 48 377.8 48L262.2 48zM128 208L128 512C128 547.3 156.7 576 192 576L448 576C483.3 576 512 547.3 512 512L512 208L464 208L464 512C464 520.8 456.8 528 448 528L192 528C183.2 528 176 520.8 176 512L176 208L128 208zM288 280C288 266.7 277.3 256 264 256C250.7 256 240 266.7 240 280L240 456C240 469.3 250.7 480 264 480C277.3 480 288 469.3 288 456L288 280zM400 280C400 266.7 389.3 256 376 256C362.7 256 352 266.7 352 280L352 456C352 469.3 362.7 480 376 480C389.3 480 400 469.3 400 456L400 280z"/></svg></button>
+    <button class="edit-btn" onclick="editCard(${item.id})"><i class="fa-solid fa-pen"></i></button>
+    <button class="delete-btn" onclick="deleteCard(${item.id})">${deleteSvg}</button>
     <h3>${item.title}</h3>
     <span class="badge type-${typeClass}">${typeClass}</span>
     <span class="badge status-${statusClass}">${statusClass}</span>
@@ -86,4 +93,66 @@ function deleteCard(idToRemove) {
 
     displayMedia();
   }, 400);
+}
+
+function editCard(idToEdit) {
+  const item = mediaVault.find(function (i) {
+    return i.id === idToEdit;
+  });
+
+  const cardElement = document.getElementById(`card-${idToEdit}`);
+  cardElement.classList.add("editing");
+
+  cardElement.innerHTML = `
+          <input
+            type="text"
+            class="inline-edit-input"
+            autocomplete="off"
+            value="${item.title}"
+            id="edit-title-${idToEdit}"
+          />
+
+          <select id="edit-type-${idToEdit}" class="inline-edit-select">
+            <option value="Anime" ${item.type === "Anime" ? "selected" : ""}>Anime</option>
+            <option value="Movie" ${item.type === "Movie" ? "selected" : ""}>Movie</option>
+            <option value="TV-Show" ${item.type === "TV-Show" ? "selected" : ""}>TV Show</option>
+            <option value="Game" ${item.type === "Game" ? "selected" : ""}>Game</option>
+          </select>
+
+          <select id="edit-status-${idToEdit}" class="inline-edit-select">
+            <option value="Watching" ${item.status === "Watching" ? "selected" : ""}>Currently Watching</option>
+            <option value="Completed"  ${item.status === "Completed" ? "selected" : ""}>Completed</option>
+            <option value="Plan to Watch"  ${item.status === "Plan to Watch" ? "selected" : ""}>Plan to Watch</option>
+          </select>
+
+          <div class="inline-edit-actions">
+          <button class="save-btn" onclick="saveEdit(${idToEdit})">Save</button>
+          <button class="cancel-btn" onclick="displayMedia()">Cancel</button>
+          </div>
+          `;
+}
+
+function saveEdit(idToSave) {
+  const newTitle = document
+    .getElementById(`edit-title-${idToSave}`)
+    .value.trim();
+  const newType = document.getElementById(`edit-type-${idToSave}`).value;
+  const newStatus = document.getElementById(`edit-status-${idToSave}`).value;
+
+  if (newTitle == "") {
+    alert("Title cannot be empty!");
+    return;
+  }
+
+  const itemIndex = mediaVault.findIndex(function (i) {
+    return i.id === idToSave;
+  });
+
+  if (itemIndex !== -1) {
+      mediaVault[itemIndex].title = newTitle;
+      mediaVault[itemIndex].type = newType;
+    mediaVault[itemIndex].status = newStatus;
+  }
+
+  displayMedia();
 }

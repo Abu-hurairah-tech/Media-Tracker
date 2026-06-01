@@ -23,6 +23,12 @@ body {
   font-size: 24px;
   letter-spacing: 1px;
   color: #e0e0e0;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.nav-logo h2:hover {
+  color: #ff4757;
 }
 
 .nav-links {
@@ -42,7 +48,7 @@ body {
 
 .nav-links a:hover,
 .nav-links a.active {
-  color: #ff4757; /* A sharp red accent color */
+  color: #ff4757;
 }
 
 .add-btn {
@@ -94,6 +100,15 @@ body {
   outline: none;
   padding: 12px;
   border-radius: 6px;
+  font-weight: bold;
+}
+
+.input-group input {
+  font-size: 14px;
+}
+
+.input-group select {
+  cursor: pointer;
 }
 
 #title-input {
@@ -102,6 +117,11 @@ body {
 
 .input-group input:focus,
 .input-group select:focus {
+  border-color: #ff4757;
+}
+
+.input-group select:hover,
+.input-group input:hover {
   border-color: #ff4757;
 }
 
@@ -131,8 +151,8 @@ body {
 
 .fade-out {
   opacity: 0 !important;
-  transform: scale(0.8) translateY(30px) !important; /* Shrink to 80% and drop down 30px */
-  pointer-events: none; /* Prevents the user from clicking it while it's fading */
+  transform: scale(0.8) translateY(30px) !important;
+  pointer-events: none;
 }
 
 .media-card h3 {
@@ -196,4 +216,110 @@ body {
 .delete-btn:hover svg {
   fill: #ff4757;
   transform: rotate(10deg);
+}
+
+.delete-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.edit-btn {
+  position: absolute;
+  top: 15px;
+  right: 45px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.edit-btn i {
+  font-size: 14px;
+  color: #a0a0a0;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.edit-btn:hover i {
+  color: #3498db;
+  transform: translateY(-2px);
+  transform: rotate(80deg);
+}
+
+.media-card.editing {
+  transform: scale(1.05);
+  z-index: 10;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  border-left-color: #3498db;
+  padding-bottom: 20px;
+}
+
+.inline-edit-input,
+.inline-edit-select {
+  width: 95%;
+  margin-bottom: 12px;
+  padding: 10px;
+  background-color: #2a2a2a;
+  border: 1px solid #444;
+  color: white;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  cursor: pointer;
+}
+
+.inline-edit-input:hover,
+.inline-edit-select:hover {
+  border-color: #3498db;
+}
+
+.inline-edit-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+.save-btn {
+  flex: 1;
+  color: white;
+  border: none;
+  padding: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  background-color: #ff4757;
+  transition: color 0.2s ease;
+
+  cursor: pointer;
+}
+
+.save-btn:hover {
+  background-color: #ff5a68;
+}
+.save-btn:active,
+.cancel-btn:active {
+  transform: scale(0.95);
+}
+
+.cancel-btn {
+  flex: 1;
+  background-color: transparent;
+  color: #a0a0a0;
+  border: 1px solid #444;
+  padding: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  cursor: pointer;
+}
+
+.cancel-btn:hover {
+  border: 1px solid #ff4757;
+  color: white;
 }
