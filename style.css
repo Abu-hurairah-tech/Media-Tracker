@@ -617,92 +617,112 @@ body {
 }
 
 /* =========================================
-   📱 MOBILE RESPONSIVENESS (MEDIA QUERIES)
+   RESPONSIVENESS (MEDIA QUERIES)
    ========================================= */
 
-/* For Tablets and standard Mobile Phones (Screens smaller than 768px) */
-@media (max-width: 768px) {
-  /* 1. Stack the Navbar */
-  .navbar {
-    flex-direction: column;
-    padding: 15px 20px;
-    gap: 15px;
-  }
+/* --- TABLETS (Screens smaller than 850px) --- */
+@media (max-width: 850px) {
+    /* Stack the Navbar */
+    .navbar {
+        flex-direction: column;
+        padding: 15px 20px;
+        gap: 15px;
+    }
 
-  .nav-links {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px;
-    width: 100%;
-  }
+    .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 100%;
+    }
 
-  /* Keep the search bar from pushing things off-screen */
-  .search-wrapper.active #search-input {
-    width: 150px;
-  }
+    .search-wrapper.active #search-input {
+        width: 160px;
+    }
 
-  /* 2. Stack the Input Form */
-  /* Forces the form elements into a single vertical column on phones */
-  .input-group {
-    flex-direction: column;
-    align-items: stretch;
-  }
+    /* Stop the form from stretching into giant wide noodles on tablets */
+    .form-section {
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
 
-  .autocomplete-wrapper,
-  .input-group > * {
-    flex: 1 1 100%;
-    width: 100%;
-  }
-
-  /* 3. Adjust the Media Grid */
-  /* Drops the minimum card size so 2 cards can still fit side-by-side on most phones */
-  .gallery {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 15px;
-  }
-
-  /* Shrink the poster height slightly to save vertical space */
-  .card-poster-img {
-    height: 200px;
-  }
-
-  .media-card h3 {
-    font-size: 16px;
-  }
-
-  /* 4. Dashboard Stats Fix */
-  .stats-grid {
-    grid-template-columns: repeat(
-      2,
-      1fr
-    ); /* Forces a neat 2x3 grid on phones */
-  }
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
-/* For Very Small Phones (Screens smaller than 480px) */
-@media (max-width: 480px) {
-  /* Stack the dates on tiny screens so they don't overlap */
-  .card-dates {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
+/* --- MOBILE PHONES (Screens smaller than 600px) --- */
+@media (max-width: 600px) {
+    .input-group {
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+    }
 
-  /* Shrink the badges slightly */
-  .badge {
-    font-size: 10px;
-    padding: 3px 8px;
-    margin-bottom: 5px;
-  }
+    /* 💥 THE FIX: Strip away desktop flex rules so they don't mess up the width */
+    .autocomplete-wrapper,
+    .input-group > * {
+        flex: none !important; 
+        width: 100% !important;
+        display: block;
+    }
 
-  /* Ensure modals don't touch the exact edges of a tiny phone screen */
-  .modal-content,
-  .dashboard-content {
-    width: 95%;
-    padding: 20px;
-  }
+    /* Guarantee every input and button perfectly stretches edge-to-edge */
+    .input-group input, 
+    .input-group select, 
+    .add-btn {
+        width: 100% !important;
+        height: 50px !important; 
+        font-size: 16px !important;
+        box-sizing: border-box !important;
+    }
 
-  .stats-grid {
-    grid-template-columns: 1fr; /* Drops to a single column on the smallest screens */
-  }
+    .add-btn {
+        height: 55px !important;
+        margin-top: 5px;
+    }
+
+    /* Scale down the grid for mobile thumbs */
+    .gallery {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 12px;
+    }
+
+    .card-poster-img {
+        height: 220px;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr; /* Stack dashboard stats to a single column */
+    }
+}
+
+/* --- VERY SMALL SCREENS (Screens smaller than 400px) --- */
+@media (max-width: 400px) {
+    /* Stop dates and badges from crashing into each other */
+    .card-dates {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+
+    .badge {
+        font-size: 10px;
+        padding: 3px 8px;
+    }
+
+    /* Switch to a 1-column layout for the media cards on tiny screens */
+    .gallery {
+        grid-template-columns: 1fr;
+    }
+
+    .card-poster-img {
+        height: 350px; /* Make the poster taller since it spans the full width of the screen now */
+    }
+
+    .modal-content,
+    .dashboard-content {
+        width: 95%;
+        padding: 20px;
+    }
 }
