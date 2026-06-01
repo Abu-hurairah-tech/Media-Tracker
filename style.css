@@ -176,8 +176,25 @@ body {
   border-color: #ff4757;
 }
 
+#date-input {
+    padding: 10px;
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    color: white;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+    cursor: pointer;
+}
+
+/* Changes the calendar icon color to white so it's visible on dark backgrounds */
+::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+}
+
 .input-group select:hover,
-.input-group input:hover {
+.input-group input:hover,
+#date-input:hover {
   border-color: #ff4757;
 }
 
@@ -203,6 +220,19 @@ body {
 
 .media-card:hover {
   transform: translateY(-5px);
+}
+
+.card-dates {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    padding-top: 10px;
+    border-top: 1px solid #333; 
+    
+    font-size: 11px;
+    color: #666;
+    font-style: italic;
 }
 
 .fade-out {

@@ -26,11 +26,13 @@ function updateStorage() {
 mediaForm.addEventListener("submit", function (e) {
   e.preventDefault();
 
-  const title = titleInput.value;
+  const title = titleInput.value.trim();
   const type = typeInput.value;
   const status = statusInput.value;
+  // 1. Grab the raw value from the new HTML calendar
+  const rawDate = document.getElementById("date-input").value;
 
-  if (title == "") {
+  if (title === "") {
     alert("Please enter a title before adding!");
     return;
   }
@@ -54,69 +56,100 @@ mediaForm.addEventListener("submit", function (e) {
   const dd = String(today.getDate()).padStart(2, "0");
   const mm = String(today.getMonth() + 1).padStart(2, "0");
   const yyyy = today.getFullYear();
-  const FormattedDate = dd + "/" + mm + "/" + yyyy;
+  const currentDate = dd + "/" + mm + "/" + yyyy;
 
+  // 2. Determine the Status Date (Manual vs Default)
+  let customStatusDate = currentDate; // It defaults to today...
+
+  if (rawDate !== "") {
+    // ...BUT if the user picked a calendar date, use that instead!
+    const parts = rawDate.split("-");
+    customStatusDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
+  }
+
+  // 3. Save them completely independently!
   const newItem = {
     id: Date.now(),
     title: title,
     type: type,
     status: status,
-    dateAdded: FormattedDate,
+    dateAdded: currentDate, // ALWAYS today's real date
+    statusDate: customStatusDate, // The manual calendar date (or today if left blank)
   };
 
   mediaVault.push(newItem);
   updateStorage();
   displayMedia();
+
+  // 4. Clear the inputs after submitting
   titleInput.value = "";
+  document.getElementById("date-input").value = "";
 });
 
 function displayMedia() {
+  // 1. Clear the gallery once
   gallery.innerHTML = "";
 
-  mediaVault.forEach(function (item) {
-    gallery.innerHTML = "";
+  // 2. Grab the master data
+  let itemsToDisplay = mediaVault;
 
-    let itemsToDisplay = mediaVault;
+  // 3. Apply Tab/Badge Filters
+  if (currentFilter !== "All") {
+    itemsToDisplay = mediaVault.filter(function (item) {
+      return item.status === currentFilter || item.type === currentFilter;
+    });
+  }
 
-    if (currentFilter !== "All") {
-      itemsToDisplay = mediaVault.filter(function (item) {
-        return item.status === currentFilter || item.type === currentFilter;
-      });
+  // 4. Apply Search Bar Filter
+  const searchTerm = searchInput.value.toLowerCase().trim();
+  if (searchTerm !== "") {
+    itemsToDisplay = itemsToDisplay.filter(function (item) {
+      return (
+        item.title.toLowerCase().includes(searchTerm) ||
+        item.type.toLowerCase().includes(searchTerm) ||
+        item.status.toLowerCase().includes(searchTerm) ||
+        item.dateAdded.includes(searchTerm)
+      );
+    });
+  }
+
+  // 5. Draw the filtered items! (Only one loop needed here)
+  itemsToDisplay.forEach(function (item) {
+    const card = document.createElement("div");
+    card.classList.add("media-card");
+    card.id = `card-${item.id}`;
+
+    const typeClass = item.type.toLowerCase();
+    const statusClass = item.status.toLowerCase().replace(/\s/g, "-");
+
+    const safeStatus = item.status.toLowerCase();
+
+    // 2. Figure out the date text
+    let statusDateHTML = "";
+    if (safeStatus.includes("watching")) {
+      statusDateHTML = `<span>Started: ${item.statusDate || item.dateAdded}</span>`;
+    } else if (safeStatus.includes("completed")) {
+      statusDateHTML = `<span>Completed: ${item.statusDate || item.dateAdded}</span>`;
     }
 
-    const searchTerm = searchInput.value.toLowerCase().trim();
+    // 3. THE DEVELOPER TRICK: Print the exact data to the console so we can see it!
+    console.log(
+      `Checking card: ${item.title} | Status saved as: "${item.status}"`,
+    );
 
-    if (searchTerm !== "") {
-      itemsToDisplay = itemsToDisplay.filter(function (item) {
-        // We check if the search term exists inside the title, type, status, OR date!
-        return (
-          item.title.toLowerCase().includes(searchTerm) ||
-          item.type.toLowerCase().includes(searchTerm) ||
-          item.status.toLowerCase().includes(searchTerm) ||
-          item.dateAdded.includes(searchTerm)
-        );
-      });
-    }
-
-    itemsToDisplay.forEach(function (item) {
-      const card = document.createElement("div");
-      card.classList.add("media-card");
-      card.id = `card-${item.id}`;
-
-      const typeClass = item.type.toLowerCase();
-      const statusClass = item.status.toLowerCase().replace(/\s/g, "-");
-
-      card.innerHTML = `
-    <button class="edit-btn" onclick="editCard(${item.id})"><i class="fa-solid fa-pen"></i></button>
-    <button class="delete-btn" onclick="deleteCard(${item.id})">${deleteSvg}</button>
-    <h3>${item.title}</h3>
-    <span class="badge type-${typeClass}" onclick="applyFilter('${item.type}')">${typeClass}</span>
-    <span class="badge status-${statusClass}" onclick="applyFilter('${item.status}')">${statusClass}</span>
-    <span class="date-Added">Added on: ${item.dateAdded}</span>
+    card.innerHTML = `
+      <button class="edit-btn" onclick="editCard(${item.id})"><i class="fa-solid fa-pen"></i></button>
+      <button class="delete-btn" onclick="deleteCard(${item.id})">${deleteSvg}</button>
+      <h3>${item.title}</h3>
+      <span class="badge type-${typeClass}" onclick="applyFilter('${item.type}')">${typeClass}</span>
+      <span class="badge status-${statusClass}" onclick="applyFilter('${item.status}')">${statusClass}</span>
+      <div class="card-dates">
+          <span>Added: ${item.dateAdded}</span>
+          ${statusDateHTML}
+      </div>
     `;
 
-      gallery.appendChild(card);
-    });
+    gallery.appendChild(card);
   });
 }
 
@@ -163,33 +196,38 @@ function editCard(idToEdit) {
   const cardElement = document.getElementById(`card-${idToEdit}`);
   cardElement.classList.add("editing");
 
+  // 1. THE FLIP: Convert DD/MM/YYYY to YYYY-MM-DD for the HTML Calendar
+  let currentDate = item.statusDate || item.dateAdded;
+  let calendarFormat = "";
+  if (currentDate.includes("/")) {
+    const parts = currentDate.split("/"); // Chops it into [DD, MM, YYYY]
+    calendarFormat = `${parts[2]}-${parts[1]}-${parts[0]}`; // Rebuilds it backwards!
+  }
+
+  // 2. Add the <input type="date"> to the panel
   cardElement.innerHTML = `
-          <input
-            type="text"
-            class="inline-edit-input"
-            autocomplete="off"
-            value="${item.title}"
-            id="edit-title-${idToEdit}"
-          />
+    <input type="text" class="inline-edit-input" autocomplete="off" value="${item.title}" id="edit-title-${idToEdit}" />
 
-          <select id="edit-type-${idToEdit}" class="inline-edit-select">
-            <option value="Anime" ${item.type === "Anime" ? "selected" : ""}>Anime</option>
-            <option value="Movie" ${item.type === "Movie" ? "selected" : ""}>Movie</option>
-            <option value="TV-Show" ${item.type === "TV-Show" ? "selected" : ""}>TV Show</option>
-            <option value="Game" ${item.type === "Game" ? "selected" : ""}>Game</option>
-          </select>
+    <select id="edit-type-${idToEdit}" class="inline-edit-select">
+      <option value="Anime" ${item.type === "Anime" ? "selected" : ""}>Anime</option>
+      <option value="Movie" ${item.type === "Movie" ? "selected" : ""}>Movie</option>
+      <option value="TV-Show" ${item.type === "TV-Show" ? "selected" : ""}>TV Show</option>
+      <option value="Game" ${item.type === "Game" ? "selected" : ""}>Game</option>
+    </select>
 
-          <select id="edit-status-${idToEdit}" class="inline-edit-select">
-            <option value="Watching" ${item.status === "Watching" ? "selected" : ""}>Currently Watching</option>
-            <option value="Completed"  ${item.status === "Completed" ? "selected" : ""}>Completed</option>
-            <option value="Plan to Watch"  ${item.status === "Plan to Watch" ? "selected" : ""}>Plan to Watch</option>
-          </select>
+    <select id="edit-status-${idToEdit}" class="inline-edit-select">
+      <option value="Watching" ${item.status === "Watching" ? "selected" : ""}>Currently Watching</option>
+      <option value="Completed"  ${item.status === "Completed" ? "selected" : ""}>Completed</option>
+      <option value="Plan to Watch"  ${item.status === "Plan to Watch" ? "selected" : ""}>Plan to Watch</option>
+    </select>
 
-          <div class="inline-edit-actions">
-          <button class="save-btn" onclick="saveEdit(${idToEdit})">Save</button>
-          <button class="cancel-btn" onclick="displayMedia()">Cancel</button>
-          </div>
-          `;
+    <input type="date" id="edit-date-${idToEdit}" class="inline-edit-input" value="${calendarFormat}" />
+
+    <div class="inline-edit-actions">
+      <button class="save-btn" onclick="saveEdit(${idToEdit})">Save</button>
+      <button class="cancel-btn" onclick="displayMedia()">Cancel</button>
+    </div>
+  `;
 }
 
 function saveEdit(idToSave) {
@@ -198,6 +236,9 @@ function saveEdit(idToSave) {
     .value.trim();
   const newType = document.getElementById(`edit-type-${idToSave}`).value;
   const newStatus = document.getElementById(`edit-status-${idToSave}`).value;
+
+  // 1. Grab the raw date from the new calendar input
+  const rawDate = document.getElementById(`edit-date-${idToSave}`).value;
 
   if (newTitle == "") {
     alert("Title cannot be empty!");
@@ -209,9 +250,20 @@ function saveEdit(idToSave) {
   });
 
   if (itemIndex !== -1) {
+    // 2. THE FLIP BACK: Convert YYYY-MM-DD back to your DD/MM/YYYY format
+    let finalDateToSave = mediaVault[itemIndex].statusDate;
+
+    if (rawDate !== "") {
+      const parts = rawDate.split("-"); // Chops it into [YYYY, MM, DD]
+      finalDateToSave = `${parts[2]}/${parts[1]}/${parts[0]}`; // Rebuilds it to DD/MM/YYYY
+    }
+
+    // 3. Save all the new data
     mediaVault[itemIndex].title = newTitle;
     mediaVault[itemIndex].type = newType;
     mediaVault[itemIndex].status = newStatus;
+    mediaVault[itemIndex].statusDate = finalDateToSave; // Save our perfectly formatted manual date!
+
     updateStorage();
   }
 
