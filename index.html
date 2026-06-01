@@ -60,7 +60,7 @@
         <form class="input-group" id="media-form">
           <input
             type="text"
-            placeholder="Berserk, Bleach: TYBW,..."
+            placeholder="Add Title (e.g. Berserk, Bleach: TYBW,...)"
             autocomplete="off"
             id="title-input"
           />
@@ -100,6 +100,24 @@
         </div>
       </section>
     </main>
+
+    <div class="modal-overlay" id="delete-modal">
+      <div class="modal-content">
+        <h3>Delete Media?</h3>
+        <p>
+          Are you sure you want to remove this from your vault? This action
+          cannot be undone.
+        </p>
+        <div class="modal-actions">
+          <button class="cancel-btn" onclick="closeDeleteModal()">
+            Cancel
+          </button>
+          <button class="confirm-delete-btn" onclick="confirmDelete()">
+            Yes, Delete
+          </button>
+        </div>
+      </div>
+    </div>
 
     <script src="script.js"></script>
   </body>
