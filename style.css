@@ -17,6 +17,9 @@ body {
   background-color: #1e1e1e;
   border-bottom: 2px solid #333;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .nav-logo h2 {
@@ -35,7 +38,7 @@ body {
   list-style: none;
   display: flex;
   align-items: center;
-  gap: 25px; /* Creates even space between buttons */
+  gap: 25px;
 }
 
 .nav-links a {
@@ -49,6 +52,59 @@ body {
 .nav-links a:hover,
 .nav-links a.active {
   color: #ff4757;
+}
+
+.search-wrapper {
+    display: flex;
+    align-items: center;
+    background-color: transparent;
+    border-radius: 20px;
+    transition: background-color 0.3s ease;
+}
+
+.search-wrapper.active {
+    background-color: #2a2a2a; 
+    border: 1px solid #444;
+}
+
+#search-input {
+    width: 0; /* Hidden by default */
+    opacity: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: white;
+    font-size: 14px;
+    outline: none;
+    transition: width 0.4s ease, opacity 0.3s ease, padding 0.4s ease;
+}
+
+.search-wrapper.active #search-input {
+    width: 200px;
+    opacity: 1;
+    padding: 8px 15px;
+}
+
+.search-icon-btn {
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    color: #a0a0a0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.search-icon-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.search-icon-btn:hover {
+    color: #3498db; /* Glows blue on hover */
+    transform: scale(1.1);
 }
 
 .add-btn {
@@ -170,7 +226,8 @@ body {
   background-color: #2a2a2a;
   transition:
     transform 0.2s ease,
-    color 0.3s ease;
+    color 0.3s ease,
+    opacity 0.2s ease;
   text-transform: capitalize;
   color: #a0a0a0;
   cursor: pointer;
@@ -178,7 +235,8 @@ body {
 
 .badge:hover {
   color: #ff4757;
-  transform: translateY(-5px);
+  transform: scale(1.05);
+  opacity: 0.8;
 }
 
 .date-Added {

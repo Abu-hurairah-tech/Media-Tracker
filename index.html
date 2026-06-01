@@ -27,7 +27,31 @@
         <li><a href="#" class="active">All</a></li>
         <li><a href="#">Watching</a></li>
         <li><a href="#">Completed</a></li>
-        <li><button class="add-btn">Add New</button></li>
+
+        <li>
+          <div class="search-wrapper" id="search-wrapper">
+            <input
+              type="text"
+              id="search-input"
+              placeholder="Search titles, types, dates..."
+              autocomplete="off"
+            />
+            <button class="search-icon-btn" id="search-icon-btn">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </button>
+          </div>
+        </li>
       </ul>
     </nav>
 

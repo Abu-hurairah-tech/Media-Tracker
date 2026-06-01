@@ -8,8 +8,13 @@ let typeInput = document.getElementById("type-input");
 let statusInput = document.getElementById("status-input");
 let submitBtn = document.getElementById("submit-btn");
 let gallery = document.getElementById("media-gallery");
+const searchWrapper = document.getElementById("search-wrapper");
+const searchIconBtn = document.getElementById("search-icon-btn");
+const searchInput = document.getElementById("search-input");
+let filterLinks = document.querySelectorAll(".nav-links a");
+let currentFilter = "All";
 
-let mediaVault = JSON.parse(localStorage.getItem('mediaVault')) || [];
+let mediaVault = JSON.parse(localStorage.getItem("mediaVault")) || [];
 displayMedia();
 
 function updateStorage() {
@@ -67,23 +72,49 @@ function displayMedia() {
   gallery.innerHTML = "";
 
   mediaVault.forEach(function (item) {
-    const card = document.createElement("div");
-    card.classList.add("media-card");
-    card.id = `card-${item.id}`;
+    gallery.innerHTML = "";
 
-    const typeClass = item.type.toLowerCase();
-    const statusClass = item.status.toLowerCase().replace(/\s/g, "-");
+    let itemsToDisplay = mediaVault;
 
-    card.innerHTML = `
+    if (currentFilter !== "All") {
+      itemsToDisplay = mediaVault.filter(function (item) {
+        return item.status === currentFilter || item.type === currentFilter;
+      });
+    }
+
+    const searchTerm = searchInput.value.toLowerCase().trim();
+
+    if (searchTerm !== "") {
+      itemsToDisplay = itemsToDisplay.filter(function (item) {
+        // We check if the search term exists inside the title, type, status, OR date!
+        return (
+          item.title.toLowerCase().includes(searchTerm) ||
+          item.type.toLowerCase().includes(searchTerm) ||
+          item.status.toLowerCase().includes(searchTerm) ||
+          item.dateAdded.includes(searchTerm)
+        );
+      });
+    }
+
+    itemsToDisplay.forEach(function (item) {
+      const card = document.createElement("div");
+      card.classList.add("media-card");
+      card.id = `card-${item.id}`;
+
+      const typeClass = item.type.toLowerCase();
+      const statusClass = item.status.toLowerCase().replace(/\s/g, "-");
+
+      card.innerHTML = `
     <button class="edit-btn" onclick="editCard(${item.id})"><i class="fa-solid fa-pen"></i></button>
     <button class="delete-btn" onclick="deleteCard(${item.id})">${deleteSvg}</button>
     <h3>${item.title}</h3>
-    <span class="badge type-${typeClass}">${typeClass}</span>
-    <span class="badge status-${statusClass}">${statusClass}</span>
+    <span class="badge type-${typeClass}" onclick="applyFilter('${item.type}')">${typeClass}</span>
+    <span class="badge status-${statusClass}" onclick="applyFilter('${item.status}')">${statusClass}</span>
     <span class="date-Added">Added on: ${item.dateAdded}</span>
     `;
 
-    gallery.appendChild(card);
+      gallery.appendChild(card);
+    });
   });
 }
 
@@ -164,3 +195,40 @@ function saveEdit(idToSave) {
 
   displayMedia();
 }
+
+searchIconBtn.addEventListener("click", function (e) {
+  e.preventDefault();
+  searchWrapper.classList.toggle("active");
+
+  if (searchWrapper.classList.contains("active")) {
+    searchInput.focus();
+  } else {
+    searchInput.value = "";
+    displayMedia();
+  }
+});
+
+searchInput.addEventListener("input", function () {
+  displayMedia();
+});
+
+function applyFilter(filterValue) {
+  currentFilter = filterValue;
+
+  filterLinks.forEach(function (link) {
+    if (link.innerText === filterValue) {
+      link.classList.add("active");
+    } else {
+      link.classList.remove("active");
+    }
+  });
+
+  displayMedia();
+}
+
+filterLinks.forEach(function (link) {
+  link.addEventListener("click", function (e) {
+    e.preventDefault();
+    applyFilter(this.innerText);
+  });
+});
