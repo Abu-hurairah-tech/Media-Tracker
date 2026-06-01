@@ -9,7 +9,12 @@ let statusInput = document.getElementById("status-input");
 let submitBtn = document.getElementById("submit-btn");
 let gallery = document.getElementById("media-gallery");
 
-let mediaVault = [];
+let mediaVault = JSON.parse(localStorage.getItem('mediaVault')) || [];
+displayMedia();
+
+function updateStorage() {
+  localStorage.setItem("mediaVault", JSON.stringify(mediaVault));
+}
 
 mediaForm.addEventListener("submit", function (e) {
   e.preventDefault();
@@ -53,6 +58,7 @@ mediaForm.addEventListener("submit", function (e) {
   };
 
   mediaVault.push(newItem);
+  updateStorage();
   displayMedia();
   titleInput.value = "";
 });
@@ -91,6 +97,7 @@ function deleteCard(idToRemove) {
       return item.id !== idToRemove;
     });
 
+    updateStorage();
     displayMedia();
   }, 400);
 }
@@ -149,9 +156,10 @@ function saveEdit(idToSave) {
   });
 
   if (itemIndex !== -1) {
-      mediaVault[itemIndex].title = newTitle;
-      mediaVault[itemIndex].type = newType;
+    mediaVault[itemIndex].title = newTitle;
+    mediaVault[itemIndex].type = newType;
     mediaVault[itemIndex].status = newStatus;
+    updateStorage();
   }
 
   displayMedia();
