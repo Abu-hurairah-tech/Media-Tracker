@@ -59,12 +59,15 @@
     <main class="container">
       <section class="form-section">
         <form class="input-group" id="media-form">
-          <input
-            type="text"
-            placeholder="Add Title (e.g. Berserk, Bleach: TYBW,...)"
-            autocomplete="off"
-            id="title-input"
-          />
+          <div class="autocomplete-wrapper">
+            <input
+              type="text"
+              id="title-input"
+              placeholder="e.g., Berserk, Bleach: TYBW..."
+              autocomplete="off"
+            />
+            <ul id="suggestions-list" class="suggestions-list"></ul>
+          </div>
 
           <select id="type-input">
             <option value="Anime">Anime</option>

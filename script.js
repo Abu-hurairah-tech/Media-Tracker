@@ -1,4 +1,5 @@
 console.log("hello");
+let selectedImageUrl = "";
 const deleteSvg =
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free 7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M262.2 48C248.9 48 236.9 56.3 232.2 68.8L216 112L120 112C106.7 112 96 122.7 96 136C96 149.3 106.7 160 120 160L520 160C533.3 160 544 149.3 544 136C544 122.7 533.3 112 520 112L424 112L407.8 68.8C403.1 56.3 391.2 48 377.8 48L262.2 48zM128 208L128 512C128 547.3 156.7 576 192 576L448 576C483.3 576 512 547.3 512 512L512 208L464 208L464 512C464 520.8 456.8 528 448 528L192 528C183.2 528 176 520.8 176 512L176 208L128 208zM288 280C288 266.7 277.3 256 264 256C250.7 256 240 266.7 240 280L240 456C240 469.3 250.7 480 264 480C277.3 480 288 469.3 288 456L288 280zM400 280C400 266.7 389.3 256 376 256C362.7 256 352 266.7 352 280L352 456C352 469.3 362.7 480 376 480C389.3 480 400 469.3 400 456L400 280z"/></svg>';
 
@@ -29,7 +30,6 @@ mediaForm.addEventListener("submit", function (e) {
   const title = titleInput.value.trim();
   const type = typeInput.value;
   const status = statusInput.value;
-  // 1. Grab the raw value from the new HTML calendar
   const rawDate = document.getElementById("date-input").value;
 
   if (title === "") {
@@ -62,12 +62,12 @@ mediaForm.addEventListener("submit", function (e) {
   let customStatusDate = currentDate; // It defaults to today...
 
   if (rawDate !== "") {
-    // ...BUT if the user picked a calendar date, use that instead!
+    //if the user picked a calendar date, use that instead!
     const parts = rawDate.split("-");
     customStatusDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
   }
 
-  // 3. Save them completely independently!
+  //Save them completely independently!
   const newItem = {
     id: Date.now(),
     title: title,
@@ -75,32 +75,141 @@ mediaForm.addEventListener("submit", function (e) {
     status: status,
     dateAdded: currentDate, // ALWAYS today's real date
     statusDate: customStatusDate, // The manual calendar date (or today if left blank)
+    imgUrl: selectedImageUrl,
   };
 
   mediaVault.push(newItem);
   updateStorage();
   displayMedia();
 
-  // 4. Clear the inputs after submitting
+  // Clear the inputs & reset the image memory!
   titleInput.value = "";
   document.getElementById("date-input").value = "";
+  selectedImageUrl = "";
+});
+
+// --- LIVE API AUTOCOMPLETE ---
+const suggestionsList = document.getElementById("suggestions-list");
+let debounceTimer;
+
+// 1. Listen for the user typing in the title box
+titleInput.addEventListener("input", function () {
+  clearTimeout(debounceTimer);
+  const query = this.value.trim();
+
+  if (query.length < 2) {
+    suggestionsList.innerHTML = "";
+    return;
+  }
+
+  // Check what type of media the user is searching for!
+  const currentType = document.getElementById("type-input").value;
+
+  debounceTimer = setTimeout(async function () {
+    try {
+      suggestionsList.innerHTML = "";
+      let normalizedResults = []; // Our clean, unified data array
+
+      // --- ROUTE 1: TV SHOWS (TVmaze API) ---
+      if (currentType === "TV-Show") {
+        const response = await fetch(
+          `https://api.tvmaze.com/search/shows?q=${query}`,
+        );
+        const data = await response.json();
+
+        // Map TVmaze messy data into our clean format
+        normalizedResults = data.slice(0, 5).map((item) => ({
+          title: item.show.name,
+          img: item.show.image
+            ? item.show.image.medium
+            : "https://placehold.co/30x40/2a2a2a/FFFFFF/png?text=?",
+          highResImg: item.show.image
+            ? item.show.image.original || item.show.image.medium
+            : "",
+        }));
+      }
+
+      // --- ROUTE 2: ANIME (Jikan API - Free, No Auth) ---
+      else if (currentType === "Anime") {
+        const response = await fetch(
+          `https://api.jikan.moe/v4/anime?q=${query}&limit=5`,
+        );
+        const data = await response.json();
+
+        normalizedResults = data.data.map((item) => ({
+          title: item.title,
+          img: item.images.jpg.image_url,
+          highResImg:
+            item.images.jpg.large_image_url || item.images.jpg.image_url,
+        }));
+      }
+
+      // --- ROUTE 3: MOVIES (OMDB API - Requires Free Key) ---
+      else if (currentType === "Movie") {
+        const apiKey = "49136baf";
+
+        const response = await fetch(
+          `https://www.omdbapi.com/?s=${query}&type=movie&apikey=${apiKey}`,
+        );
+        const data = await response.json();
+
+        if (data.Search) {
+          normalizedResults = data.Search.slice(0, 5).map((item) => ({
+            title: item.Title,
+            img:
+              item.Poster !== "N/A"
+                ? item.Poster
+                : "https://placehold.co/30x40/2a2a2a/FFFFFF/png?text=?",
+            highResImg: item.Poster !== "N/A" ? item.Poster : "",
+          }));
+        }
+      }
+
+      // --- THE RENDERER (Works for all 3 APIs automatically!) ---
+      normalizedResults.forEach(function (media) {
+        const li = document.createElement("li");
+
+        li.innerHTML = `
+            <img src="${media.img}" alt="${media.title}">
+            <span>${media.title}</span>
+        `;
+
+        li.addEventListener("click", function () {
+          titleInput.value = media.title;
+          selectedImageUrl = media.highResImg; // Saves the poster!
+          suggestionsList.innerHTML = "";
+        });
+
+        suggestionsList.appendChild(li);
+      });
+    } catch (error) {
+      console.error("Error fetching API data:", error);
+    }
+  }, 500);
+});
+
+// Hide the suggestions if the user clicks anywhere else on the page
+document.addEventListener("click", function (e) {
+  if (!document.querySelector(".autocomplete-wrapper").contains(e.target)) {
+    suggestionsList.innerHTML = "";
+  }
 });
 
 function displayMedia() {
-  // 1. Clear the gallery once
+  // Clear the gallery once
   gallery.innerHTML = "";
 
-  // 2. Grab the master data
+  // Grab the master data
   let itemsToDisplay = mediaVault;
 
-  // 3. Apply Tab/Badge Filters
+  // Apply Tab/Badge Filters
   if (currentFilter !== "All") {
     itemsToDisplay = mediaVault.filter(function (item) {
       return item.status === currentFilter || item.type === currentFilter;
     });
   }
 
-  // 4. Apply Search Bar Filter
+  // Apply Search Bar Filter
   const searchTerm = searchInput.value.toLowerCase().trim();
   if (searchTerm !== "") {
     itemsToDisplay = itemsToDisplay.filter(function (item) {
@@ -113,18 +222,21 @@ function displayMedia() {
     });
   }
 
-  // 5. Draw the filtered items! (Only one loop needed here)
+  // Draw the filtered items! (Only one loop needed here)
   itemsToDisplay.forEach(function (item) {
     const card = document.createElement("div");
     card.classList.add("media-card");
     card.id = `card-${item.id}`;
 
-    const typeClass = item.type.toLowerCase();
-    const statusClass = item.status.toLowerCase().replace(/\s/g, "-");
+    // DEFINE SAFE VARIABLES FIRST
+    const safeType = item.type ? item.type.toLowerCase() : "unknown";
+    const safeStatus = item.status ? item.status.toLowerCase() : "unknown";
 
-    const safeStatus = item.status.toLowerCase();
+    // Create the CSS classes safely
+    const typeClass = safeType;
+    const statusClass = safeStatus.replace(/\s/g, "-");
 
-    // 2. Figure out the date text
+    // FIGURE OUT THE DATES
     let statusDateHTML = "";
     if (safeStatus.includes("watching")) {
       statusDateHTML = `<span>Started: ${item.statusDate || item.dateAdded}</span>`;
@@ -132,20 +244,29 @@ function displayMedia() {
       statusDateHTML = `<span>Completed: ${item.statusDate || item.dateAdded}</span>`;
     }
 
-    // 3. THE DEVELOPER TRICK: Print the exact data to the console so we can see it!
-    console.log(
-      `Checking card: ${item.title} | Status saved as: "${item.status}"`,
-    );
+    console.log(`Checking ${item.title} image status:`, item.imgUrl);
 
+    // POSTER IMAGE HTML
+    const imageHTML = item.imgUrl
+      ? `<img src="${item.imgUrl}" class="card-poster-img" alt="${item.title} Poster" />`
+      : `<div class="card-poster-img placeholder-poster"><span>📺</span></div>`;
+
+    // INJECT EVERYTHING INTO THE CARD
+    // Note: I used ${item.type} for the badge text so it keeps its capital letters visually!
     card.innerHTML = `
+      ${imageHTML} 
+      
       <button class="edit-btn" onclick="editCard(${item.id})"><i class="fa-solid fa-pen"></i></button>
       <button class="delete-btn" onclick="deleteCard(${item.id})">${deleteSvg}</button>
-      <h3>${item.title}</h3>
-      <span class="badge type-${typeClass}" onclick="applyFilter('${item.type}')">${typeClass}</span>
-      <span class="badge status-${statusClass}" onclick="applyFilter('${item.status}')">${statusClass}</span>
-      <div class="card-dates">
-          <span>Added: ${item.dateAdded}</span>
-          ${statusDateHTML}
+      
+      <div class="card-content">
+          <h3>${item.title || "Unknown Title"}</h3>
+          <span class="badge type-${typeClass}" onclick="applyFilter('${item.type}')">${item.type}</span>
+          <span class="badge status-${statusClass}" onclick="applyFilter('${item.status}')">${item.status}</span>
+          <div class="card-dates">
+              <span>Added: ${item.dateAdded || "Unknown"}</span>
+              ${statusDateHTML}
+          </div>
       </div>
     `;
 
@@ -196,7 +317,7 @@ function editCard(idToEdit) {
   const cardElement = document.getElementById(`card-${idToEdit}`);
   cardElement.classList.add("editing");
 
-  // 1. THE FLIP: Convert DD/MM/YYYY to YYYY-MM-DD for the HTML Calendar
+  // THE FLIP: Convert DD/MM/YYYY to YYYY-MM-DD for the HTML Calendar
   let currentDate = item.statusDate || item.dateAdded;
   let calendarFormat = "";
   if (currentDate.includes("/")) {
@@ -204,7 +325,7 @@ function editCard(idToEdit) {
     calendarFormat = `${parts[2]}-${parts[1]}-${parts[0]}`; // Rebuilds it backwards!
   }
 
-  // 2. Add the <input type="date"> to the panel
+  // Add the <input type="date"> to the panel
   cardElement.innerHTML = `
     <input type="text" class="inline-edit-input" autocomplete="off" value="${item.title}" id="edit-title-${idToEdit}" />
 
@@ -237,7 +358,7 @@ function saveEdit(idToSave) {
   const newType = document.getElementById(`edit-type-${idToSave}`).value;
   const newStatus = document.getElementById(`edit-status-${idToSave}`).value;
 
-  // 1. Grab the raw date from the new calendar input
+  // Grab the raw date from the new calendar input
   const rawDate = document.getElementById(`edit-date-${idToSave}`).value;
 
   if (newTitle == "") {
@@ -250,7 +371,7 @@ function saveEdit(idToSave) {
   });
 
   if (itemIndex !== -1) {
-    // 2. THE FLIP BACK: Convert YYYY-MM-DD back to your DD/MM/YYYY format
+    //THE FLIP BACK: Convert YYYY-MM-DD back to your DD/MM/YYYY format
     let finalDateToSave = mediaVault[itemIndex].statusDate;
 
     if (rawDate !== "") {
@@ -258,7 +379,7 @@ function saveEdit(idToSave) {
       finalDateToSave = `${parts[2]}/${parts[1]}/${parts[0]}`; // Rebuilds it to DD/MM/YYYY
     }
 
-    // 3. Save all the new data
+    //Save all the new data
     mediaVault[itemIndex].title = newTitle;
     mediaVault[itemIndex].type = newType;
     mediaVault[itemIndex].status = newStatus;
@@ -307,42 +428,55 @@ filterLinks.forEach(function (link) {
   });
 });
 
-
 // --- DASHBOARD LOGIC ---
 
-const dashboardModal = document.getElementById('dashboard-modal');
-const navDashboard = document.getElementById('nav-dashboard');
-const statsContainer = document.getElementById('stats-container');
+const dashboardModal = document.getElementById("dashboard-modal");
+const navDashboard = document.getElementById("nav-dashboard");
+const statsContainer = document.getElementById("stats-container");
 
-// 1. Open Dashboard & Trigger Calculations
-navDashboard.addEventListener('click', function(e) {
-    e.preventDefault();
-    generateStats(); // Run the math
-    dashboardModal.classList.add('show'); // Reveal the modal
+// Open Dashboard & Trigger Calculations
+navDashboard.addEventListener("click", function (e) {
+  e.preventDefault();
+  generateStats(); // Run the math
+  dashboardModal.classList.add("show"); // Reveal the modal
 });
 
-// 2. Close Dashboard
+//Close Dashboard
 function closeDashboard() {
-    dashboardModal.classList.remove('show');
+  dashboardModal.classList.remove("show");
 }
 
-// 3. The Math Engine
+//The Math Engine
 function generateStats() {
-    // Total count is just the length of the array
-    const total = mediaVault.length;
-    
-    // We use the .filter() method to count specific items
-    // (Notice how we account for different types you might have added!)
-    const animeCount = mediaVault.filter(function(i) { return i.type === 'Anime'; }).length;
-    const movieCount = mediaVault.filter(function(i) { return i.type === 'Movie'; }).length;
-    const gameCount = mediaVault.filter(function(i) { return i.type === 'Game'; }).length;
+  // Total count is just the length of the array
+  const total = mediaVault.length;
 
-    // Count by Status
-    const completedCount = mediaVault.filter(function(i) { return i.status === 'Completed'; }).length;
-    const watchingCount = mediaVault.filter(function(i) { return i.status === 'Watching'; }).length;
+  // We use the .filter() method to count specific items
+  const animeCount = mediaVault.filter(function (i) {
+    return i.type === "Anime";
+  }).length;
+  const tvShowsCount = mediaVault.filter(function (i) {
+    return i.type === "TV-Show";
+  }).length;
 
-    // 4. Inject the calculated numbers into our HTML Grid
-    statsContainer.innerHTML = `
+  const totalShows = animeCount + tvShowsCount;
+  const movieCount = mediaVault.filter(function (i) {
+    return i.type === "Movie";
+  }).length;
+  const gameCount = mediaVault.filter(function (i) {
+    return i.type === "Game";
+  }).length;
+
+  // Count by Status
+  const completedCount = mediaVault.filter(function (i) {
+    return i.status === "Completed";
+  }).length;
+  const watchingCount = mediaVault.filter(function (i) {
+    return i.status === "Watching";
+  }).length;
+
+  // 4. Inject the calculated numbers into our HTML Grid
+  statsContainer.innerHTML = `
         <div class="stat-card">
             <h4>Total Entries</h4>
             <span>${total}</span>
@@ -354,8 +488,8 @@ function generateStats() {
             <h4>In Progress</h4>
             <span style="color: #f1c40f;">${watchingCount}</span> </div>
         <div class="stat-card">
-            <h4>Anime</h4>
-            <span>${animeCount}</span>
+            <h4>TV Shows/Anime</h4>
+            <span>${totalShows}</span>
         </div>
         <div class="stat-card">
             <h4>Games</h4>
