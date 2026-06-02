@@ -28,6 +28,11 @@
         <li><a href="#">Watching</a></li>
         <li><a href="#">Completed</a></li>
         <li><a href="#" id="nav-dashboard">Stats</a></li>
+        <li>
+          <button id="theme-toggle" class="theme-btn" title="Toggle Theme">
+            <i class="fa-solid fa-sun"></i>
+          </button>
+        </li>
 
         <li>
           <div class="search-wrapper" id="search-wrapper">
@@ -83,16 +88,17 @@
           </select>
 
           <input
-            type="date"
+            type="text"
             id="date-input"
-            title="Optional: Set a custom start/completion date"
+            placeholder="Started/Completed on:"
+            onfocus="this.type = 'date'"
+            onblur="if (!this.value) this.type = 'text';"
           />
           <button id="submit-btn" class="add-btn">Add to vault</button>
         </form>
       </section>
 
-      <section class="gallery" id="media-gallery">
-      </section>
+      <section class="gallery" id="media-gallery"></section>
     </main>
 
     <div class="modal-overlay" id="delete-modal">
@@ -122,6 +128,7 @@
         <div class="stats-grid" id="stats-container"></div>
       </div>
     </div>
+    <div id="toast-notification" class="toast">Added successfully!</div>
     <script src="script.js"></script>
   </body>
 </html>

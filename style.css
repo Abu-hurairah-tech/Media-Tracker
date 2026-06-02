@@ -159,6 +159,9 @@ body {
   color: white;
   font-size: 14px;
   outline: none;
+}
+
+.input-group select {
   cursor: pointer;
 }
 
@@ -251,6 +254,11 @@ body {
   border-radius: 4px;
 }
 
+.suggestions-list:empty {
+  display: none;
+  border: none;
+}
+
 /* =========================================
    MEDIA GALLERY & CARDS
    ========================================= */
@@ -325,54 +333,71 @@ body {
   font-style: italic;
 }
 
-/* Action Buttons inside Card */
+/* =========================================
+   CARD ACTION BUTTONS (EDIT & DELETE)
+   ========================================= */
 .delete-btn,
 .edit-btn {
   position: absolute;
-  top: 15px;
-  background: none;
+  top: 10px;
+  background-color: rgba(0, 0, 0, 0.65); /* Dark transparent background */
+  backdrop-filter: blur(4px); /* Sleek blur effect over posters */
   border: none;
   cursor: pointer;
-  padding: 0;
-  transition: transform 0.2s ease;
+  width: 32px; /* Fixed width for perfect circles */
+  height: 32px; /* Fixed height */
+  border-radius: 50%; /* Make them completely circular */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
+  z-index: 10; /* Make sure they sit on top of the image */
 }
 
 .delete-btn {
-  right: 15px;
+  right: 10px;
 }
 
 .edit-btn {
-  right: 45px;
+  right: 48px; /* Spaced perfectly next to the delete button */
 }
 
 .delete-btn svg {
-  width: 20px;
-  height: 20px;
-  fill: #666;
+  width: 16px;
+  height: 16px;
+  fill: #ffffff; /* Make the icon bright white for contrast */
   transition:
     fill 0.2s ease,
     transform 0.2s ease;
 }
 
 .delete-btn:hover {
+  background-color: rgba(0, 0, 0, 0.9);
   transform: scale(1.1);
 }
 
 .delete-btn:hover svg {
-  fill: #ff4757;
+  fill: #ff4757; /* Turns red on hover */
   transform: rotate(10deg);
 }
 
 .edit-btn i {
   font-size: 14px;
-  color: #a0a0a0;
+  color: #ffffff; /* Make the icon bright white for contrast */
   transition:
     color 0.2s ease,
     transform 0.2s ease;
 }
 
+.edit-btn:hover {
+  background-color: rgba(0, 0, 0, 0.9);
+  transform: scale(1.1);
+}
+
 .edit-btn:hover i {
-  color: #3498db;
+  color: #3498db; /* Turns blue on hover */
   transform: rotate(80deg);
 }
 
@@ -617,92 +642,297 @@ body {
 }
 
 /* =========================================
-   📱 MOBILE RESPONSIVENESS (MEDIA QUERIES)
+   🌓 LIGHT THEME OVERRIDES
    ========================================= */
 
-/* For Tablets and standard Mobile Phones (Screens smaller than 768px) */
-@media (max-width: 768px) {
-  /* 1. Stack the Navbar */
-  .navbar {
-    flex-direction: column;
-    padding: 15px 20px;
-    gap: 15px;
-  }
-
-  .nav-links {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px;
-    width: 100%;
-  }
-
-  /* Keep the search bar from pushing things off-screen */
-  .search-wrapper.active #search-input {
-    width: 150px;
-  }
-
-  /* 2. Stack the Input Form */
-  /* Forces the form elements into a single vertical column on phones */
-  .input-group {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .autocomplete-wrapper,
-  .input-group > * {
-    flex: 1 1 100%;
-    width: 100%;
-  }
-
-  /* 3. Adjust the Media Grid */
-  /* Drops the minimum card size so 2 cards can still fit side-by-side on most phones */
-  .gallery {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 15px;
-  }
-
-  /* Shrink the poster height slightly to save vertical space */
-  .card-poster-img {
-    height: 200px;
-  }
-
-  .media-card h3 {
-    font-size: 16px;
-  }
-
-  /* 4. Dashboard Stats Fix */
-  .stats-grid {
-    grid-template-columns: repeat(
-      2,
-      1fr
-    ); /* Forces a neat 2x3 grid on phones */
-  }
+/* Add a smooth transition to the whole page for when the theme toggles */
+body,
+.navbar,
+.form-section,
+.media-card,
+.modal-content,
+.input-group input,
+.input-group select {
+  transition:
+    background-color 0.4s ease,
+    color 0.4s ease,
+    border-color 0.4s ease;
 }
 
-/* For Very Small Phones (Screens smaller than 480px) */
-@media (max-width: 480px) {
-  /* Stack the dates on tiny screens so they don't overlap */
-  .card-dates {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
+/* Theme Toggle Button Style */
+.theme-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 5px;
+  transition: transform 0.3s ease;
+}
 
-  /* Shrink the badges slightly */
-  .badge {
-    font-size: 10px;
-    padding: 3px 8px;
-    margin-bottom: 5px;
-  }
+body.light-mode .theme-btn i {
+  color: #2f3640;
+}
 
-  /* Ensure modals don't touch the exact edges of a tiny phone screen */
-  .modal-content,
-  .dashboard-content {
-    width: 95%;
-    padding: 20px;
-  }
+/* Ensure the icon is white in Dark Mode */
+.theme-btn i {
+  color: #ffffff;
+}
 
-  .stats-grid {
-    grid-template-columns: 1fr; /* Drops to a single column on the smallest screens */
-  }
+.theme-btn:hover {
+  transform: scale(1.2);
+}
+
+/* --- THE LIGHT MODE COLORS --- */
+body.light-mode {
+  background-color: #f5f6fa;
+  color: #2f3640;
+}
+
+body.light-mode .navbar,
+body.light-mode .form-section,
+body.light-mode .media-card,
+body.light-mode .modal-content,
+body.light-mode .stat-card,
+body.light-mode .suggestions-list {
+  background-color: #ffffff;
+  border-color: #dcdde1;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* FIX 1: Form inputs get grey background, but NOT the search input! */
+body.light-mode .input-group input,
+body.light-mode .input-group select,
+body.light-mode .inline-edit-input,
+body.light-mode .inline-edit-select {
+  background-color: #f1f2f6;
+  border-color: #dcdde1;
+  color: #2f3640;
+}
+
+/* FIX 2: Restore the input hover borders that got crushed by light mode */
+body.light-mode .input-group input:hover,
+body.light-mode .input-group select:hover,
+body.light-mode .input-group input:focus,
+body.light-mode .input-group select:focus,
+body.light-mode .inline-edit-input:hover,
+body.light-mode .inline-edit-select:hover {
+  border-color: #ff4757;
+}
+
+/* FIX 3: Search input explicitly stays transparent so the rounded wrapper works */
+body.light-mode #search-input {
+  background-color: transparent;
+  color: #2f3640;
+}
+
+body.light-mode input::placeholder {
+  color: #a4b0be;
+}
+
+body.light-mode .search-wrapper.active {
+  background-color: #f1f2f6;
+  border-color: #dcdde1;
+}
+
+body.light-mode .nav-links a,
+body.light-mode .nav-logo h2,
+body.light-mode .media-card h3,
+body.light-mode .stat-card span,
+body.light-mode .modal-content h3 {
+  color: #2f3640;
+}
+
+/* FIX 4: Restore navigation and logo hovers */
+body.light-mode .nav-links a:hover,
+body.light-mode .nav-links a.active,
+body.light-mode .nav-logo h2:hover {
+  color: #ff4757;
+}
+
+body.light-mode .badge,
+body.light-mode .stat-card h4 {
+  background-color: #f1f2f6;
+  color: #718093;
+}
+
+/* FIX 5: Restore badge hovers */
+body.light-mode .badge:hover {
+  color: #ff4757;
+}
+
+body.light-mode .placeholder-poster {
+  background: linear-gradient(45deg, #f1f2f6, #e1e2e6);
+}
+
+body.light-mode .suggestions-list li {
+  color: #2f3640;
+  border-bottom: 1px solid #f1f2f6;
+}
+
+body.light-mode .suggestions-list li:hover {
+  background-color: #3498db;
+  color: #ffffff;
+}
+
+body.light-mode ::-webkit-calendar-picker-indicator {
+  filter: invert(0);
+}
+
+body.light-mode .cancel-btn {
+  color: #718093; /* A nice visible grey for the default state */
+  border-color: #dcdde1;
+}
+
+body.light-mode .cancel-btn:hover {
+  color: #ff4757; /* Turns the text red instead of white! */
+  border-color: #ff4757;
+  background-color: transparent;
+}
+
+/* =========================================
+   🍞 TOAST NOTIFICATION
+   ========================================= */
+.toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.9); /* Starts slightly shrunken */
+  background-color: rgba(0, 0, 0, 0.85); /* Semi-transparent black */
+  backdrop-filter: blur(8px); /* Premium glass blur */
+  color: #2ecc71; /* Bright success green */
+  padding: 15px 35px;
+  border-radius: 50px;
+  font-size: 16px;
+  font-weight: bold;
+  z-index: 9999;
+  opacity: 0; /* Invisible by default */
+  pointer-events: none; /* Prevents it from blocking clicks */
+  transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth fade and pop */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(46, 204, 113, 0.3); /* Subtle green border */
+}
+
+/* The class JavaScript will use to trigger the animation */
+.toast.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1); /* Pops into full size */
+}
+
+/* Light Mode Override */
+body.light-mode .toast {
+  background-color: rgba(255, 255, 255, 0.95);
+  color: #27ae60;
+  border-color: rgba(39, 174, 96, 0.3);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* =========================================
+   RESPONSIVENESS (MEDIA QUERIES)
+   ========================================= */
+
+/* --- TABLETS (Screens smaller than 850px) --- */
+@media (max-width: 850px) {
+    /* Stack the Navbar */
+    .navbar {
+        flex-direction: column;
+        padding: 15px 20px;
+        gap: 15px;
+    }
+
+    .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .search-wrapper.active #search-input {
+        width: 160px;
+    }
+
+    /* Stop the form from stretching into giant wide noodles on tablets */
+    .form-section {
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* --- MOBILE PHONES (Screens smaller than 600px) --- */
+@media (max-width: 600px) {
+    .input-group {
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+    }
+
+    /* 💥 THE FIX: Strip away desktop flex rules so they don't mess up the width */
+    .autocomplete-wrapper,
+    .input-group > * {
+        flex: none !important; 
+        width: 100% !important;
+        display: block;
+    }
+
+    /* Guarantee every input and button perfectly stretches edge-to-edge */
+    .input-group input, 
+    .input-group select, 
+    .add-btn {
+        width: 100% !important;
+        height: 50px !important; 
+        font-size: 16px !important;
+        box-sizing: border-box !important;
+    }
+
+    .add-btn {
+        height: 55px !important;
+        margin-top: 5px;
+    }
+
+    /* Scale down the grid for mobile thumbs */
+    .gallery {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 12px;
+    }
+
+    .card-poster-img {
+        height: 220px;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr; /* Stack dashboard stats to a single column */
+    }
+}
+
+/* --- VERY SMALL SCREENS (Screens smaller than 400px) --- */
+@media (max-width: 400px) {
+    /* Stop dates and badges from crashing into each other */
+    .card-dates {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+
+    .badge {
+        font-size: 10px;
+        padding: 3px 8px;
+    }
+
+    /* Switch to a 1-column layout for the media cards on tiny screens */
+    .gallery {
+        grid-template-columns: 1fr;
+    }
+
+    .card-poster-img {
+        height: 350px; /* Make the poster taller since it spans the full width of the screen now */
+    }
+
+    .modal-content,
+    .dashboard-content {
+        width: 95%;
+        padding: 20px;
+    }
 }
